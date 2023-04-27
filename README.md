@@ -4,5 +4,6 @@
 ## Libirary
 * 在pytorch， opencv，yolov5等库上进行开发
 * 使用PySide6(Python-Qt)进行可视化界面展示
+* 在必要的情况下添加c编写的dll优化程序
 ## Progress
 * 2023/4/27:目前正在搭建基本图像处理框架，包装基本函数以便后续调用
