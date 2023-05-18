@@ -1,15 +1,6 @@
-# -*- coding: utf-8 -*-
 import sys
-
-################################################################################
-## Form generated from reading UI file 'ActionRecognization.ui'
-##
-## Created by: Qt User Interface Compiler version 6.5.0
-##
-## WARNING! All changes made in this file will be lost when recompiling UI file!
-################################################################################
-
-import PySide6
+import threading
+import time
 
 from PySide6.QtCore import (QCoreApplication, QDate, QDateTime, QLocale,
     QMetaObject, QObject, QPoint, QRect,
@@ -22,11 +13,80 @@ from PySide6.QtGui import (QAction, QBrush, QColor, QConicalGradient,
 from PySide6.QtWidgets import (QApplication, QLabel, QListWidget, QListWidgetItem,
     QMainWindow, QMenu, QMenuBar, QSizePolicy,
     QSlider, QStatusBar, QWidget)
+import cv2
 
-from InjectedCode import CanvasWidget
+main_ui = None
+canvas = None
+app = None
+is_activated = True
+img_buf = None
 
 
-class Ui_MainWindow(QMainWindow):
+def change_global_var(img):
+    global img_buf
+    img_buf = img
+
+
+def update_canvas(canvas_widget, interval_sec=0.015):
+    global is_activated
+    while is_activated:
+        canvas_widget.update()
+        time.sleep(interval_sec)
+
+
+class CanvasWidget(QLabel):
+    def __init__(self, cw):
+        super().__init__(cw)
+
+    def paintEvent(self, event):
+        global img_buf
+
+        # tmp
+        p = QPainter()
+        p.begin(self)
+        if img_buf is not None:
+            pixmap = QPixmap.fromImage(img_format_converter(img_buf))
+            p.drawPixmap(0, 0, self.width(), self.height(), pixmap)
+            # p.drawLine(2,4,60,80)
+        p.end()
+
+
+def img_format_converter(cv_img) -> QImage:
+    qt_img = QImage(cv_img.data, cv_img.shape[1], cv_img.shape[0], QImage.Format_RGB888)
+    qt_img.rgbSwap()
+    return qt_img
+
+
+class InterfaceThread(threading.Thread):
+    def __init__(self):
+        super().__init__(name="ui_main_thread")
+
+    def run(self):
+        # init interface
+        global canvas, app, is_activated, main_ui
+        app = QApplication(sys.argv)
+        main_ui = Ui_MainWindow()
+        canvas = main_ui.label
+        main_ui.show()
+        # sub-thread for updating canvas
+        threading.Thread(target=update_canvas, args=(main_ui.label,), name="ui_flash_thread").start()
+        # main interface
+        app.exec()
+        is_activated = False
+
+
+#   To setup ui from qt_generated code, try this below
+#   OBJECT INIT:
+#       def __init__(self):
+#           super(Ui_MainWindow, self).__init__()
+#           self.setupUi(self)
+#
+#   CANVAS INIT:
+#       self.label = CanvasWidget(self.centralwidget)
+#
+
+
+class Ui_MainWindow(QMainWindow):   # replaceable code here!!!!
     def __init__(self):
         super(Ui_MainWindow, self).__init__()
         self.setupUi(self)
@@ -44,7 +104,7 @@ class Ui_MainWindow(QMainWindow):
         self.actionDestinationPath.setObjectName(u"actionDestinationPath")
         self.centralwidget = QWidget(MainWindow)
         self.centralwidget.setObjectName(u"centralwidget")
-        self.label = CanvasWidget()    # display area !!!!!!
+        self.label = CanvasWidget(self.centralwidget)    # display area !!!!!!
         self.label.setObjectName(u"label")
         self.label.setGeometry(QRect(0, 0, 521, 361))
         self.horizontalSlider = QSlider(self.centralwidget)
@@ -83,7 +143,7 @@ class Ui_MainWindow(QMainWindow):
         self.statusbar = QStatusBar(MainWindow)
         self.statusbar.setObjectName(u"statusbar")
         MainWindow.setStatusBar(self.statusbar)
-
+        #
         self.menubar.addAction(self.menuTools.menuAction())
         self.menubar.addAction(self.menu.menuAction())
         self.menubar.addAction(self.menuAbout.menuAction())
@@ -101,7 +161,7 @@ class Ui_MainWindow(QMainWindow):
         self.actionSource.setText(QCoreApplication.translate("MainWindow", u"Source", None))
         self.actionScreenShot.setText(QCoreApplication.translate("MainWindow", u"ScreenShot", None))
         self.actionDestinationPath.setText(QCoreApplication.translate("MainWindow", u"DestinationPath", None))
-        # self.label.setText(QCoreApplication.translate("MainWindow", u"I Am Ouput Screen!", None))
+        self.label.setText(QCoreApplication.translate("MainWindow", u"I Am Output Screen!", None))
         self.label_2.setText(QCoreApplication.translate("MainWindow", u"FrameRatio", None))
         self.label_3.setText(QCoreApplication.translate("MainWindow", u"Source:", None))
         self.label_4.setText(QCoreApplication.translate("MainWindow", u"TextLabel", None))
@@ -112,9 +172,8 @@ class Ui_MainWindow(QMainWindow):
         self.menuTools.setTitle(QCoreApplication.translate("MainWindow", u"Tools", None))
 
 
-# Test scripts
 if __name__ == '__main__':
-    app = QApplication(sys.argv)
-    ui = Ui_MainWindow()
-    ui.show()
-    app.exec()
+    it = InterfaceThread()
+    it.start()
+
+

@@ -33,6 +33,8 @@ from pathlib import Path
 
 import torch
 
+show_cv_window = False
+
 FILE = Path(__file__).resolve()
 ROOT = FILE.parents[0]  # YOLOv5 root directory
 if str(ROOT) not in sys.path:
@@ -46,9 +48,9 @@ from utils.general import (LOGGER, Profile, check_file, check_img_size, check_im
 from utils.plots import Annotator, colors, save_one_box
 from utils.torch_utils import select_device, smart_inference_mode
 
-import InjectedCode as ic
-from InjectedCode import update_canvas, img_format_converter
-from InjectedCode import InterfaceThread, CanvasWidget
+import ui_main as uim
+from ui_main import update_canvas, img_format_converter
+from ui_main import InterfaceThread, CanvasWidget
 from PySide6.QtWidgets import QLabel, QApplication
 from PySide6.QtGui import QPixmap, QPainter
 
@@ -82,8 +84,6 @@ def run(
         dnn=False,  # use OpenCV DNN for ONNX inference
         vid_stride=1,  # video frame-rate stride
 ):
-    global canvas
-
     source = str(source)
     save_img = not nosave and not source.endswith('.txt')  # save inference images
     is_file = Path(source).suffix[1:] in (IMG_FORMATS + VID_FORMATS)
@@ -119,6 +119,8 @@ def run(
     model.warmup(imgsz=(1 if pt or model.triton else bs, 3, *imgsz))  # warmup
     seen, windows, dt = 0, [], (Profile(), Profile(), Profile())
     for path, im, im0s, vid_cap, s in dataset:
+        if not uim.is_activated:
+            sys.exit(0)
         with dt[0]:
             im = torch.from_numpy(im).to(model.device)
             im = im.half() if model.fp16 else im.float()  # uint8 to fp16/32
@@ -165,7 +167,7 @@ def run(
 
                 # Write results
                 for *xyxy, conf, cls in reversed(det):                      # iterations in each det Area
-                    print(f'{xyxy[0]} {xyxy[1]} to {xyxy[2]} {xyxy[3]}')
+                    # print(f'{xyxy[0]} {xyxy[1]} to {xyxy[2]} {xyxy[3]}')
                     if save_txt:  # Write to file
                         xywh = (xyxy2xywh(torch.tensor(xyxy).view(1, 4)) / gn).view(-1).tolist()  # normalized xywh
                         line = (cls, *xywh, conf) if save_conf else (cls, *xywh)  # label format
@@ -181,8 +183,9 @@ def run(
 
             # Stream results
             im0 = annotator.result()
-            ic.img_buf = im0
-            if view_img:
+            uim.img_buf = im0
+
+            if show_cv_window:
                 if platform.system() == 'Linux' and p not in windows:
                     windows.append(p)
                     cv2.namedWindow(str(p), cv2.WINDOW_NORMAL | cv2.WINDOW_KEEPRATIO)  # allow window resize (Linux)
@@ -208,26 +211,24 @@ def run(
                         save_path = str(Path(save_path).with_suffix('.mp4'))  # force *.mp4 suffix on results videos
                         vid_writer[i] = cv2.VideoWriter(save_path, cv2.VideoWriter_fourcc(*'mp4v'), fps, (w, h))
                     vid_writer[i].write(im0)
-            # print("Get 1 target")
         # Print time (inference-only)
-        LOGGER.info(f"{s}{'' if len(det) else '(no detections), '}{dt[1].dt * 1E3:.1f}ms")
+        # LOGGER.info(f"{s}{'' if len(det) else '(no detections), '}{dt[1].dt * 1E3:.1f}ms")
 
     # Print results
     t = tuple(x.t / seen * 1E3 for x in dt)  # speeds per image
-    LOGGER.info(f'Speed: %.1fms pre-process, %.1fms inference, %.1fms NMS per image at shape {(1, 3, *imgsz)}' % t)
+    # LOGGER.info(f'Speed: %.1fms pre-process, %.1fms inference, %.1fms NMS per image at shape {(1, 3, *imgsz)}' % t)
     if save_txt or save_img:
         s = f"\n{len(list(save_dir.glob('labels/*.txt')))} labels saved to {save_dir / 'labels'}" if save_txt else ''
-        LOGGER.info(f"Results saved to {colorstr('bold', save_dir)}{s}")
+        # LOGGER.info(f"Results saved to {colorstr('bold', save_dir)}{s}")
     if update:
         strip_optimizer(weights[0])  # update model (to fix SourceChangeWarning)
 
 
 def parse_opt():
     # SOURCE_PATH = "TestSrc/src.mp4"
-    SOURCE_PATH = "https://www.youtube.com/watch?v=IrWfhbqURC4"
-    # SOURCE_PATH = "http://192.168.31.243:4747/video"
+    # SOURCE_PATH = "https://www.youtube.com/watch?v=IrWfhbqURC4"
+    SOURCE_PATH = "http://192.168.31.243:4747/video"
     OUTPUT_PATH = ROOT / 'TestSrc'
-
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--weights', nargs='+', type=str, default=ROOT / 'yolov5s.pt', help='model path or triton URL')
