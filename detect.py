@@ -199,8 +199,8 @@ def run(
 
 def parse_opt():
     # SOURCE_PATH = "TestSrc/src.mp4"
-    # SOURCE_PATH = "https://www.youtube.com/watch?v=IrWfhbqURC4"
-    SOURCE_PATH = "http://192.168.31.243:4747/video"
+    SOURCE_PATH = "https://www.youtube.com/watch?v=IrWfhbqURC4"
+    # SOURCE_PATH = "http://192.168.31.243:4747/video"
     OUTPUT_PATH = ROOT / 'TestSrc'
 
     parser = argparse.ArgumentParser()
