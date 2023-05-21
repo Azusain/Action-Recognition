@@ -1,0 +1,1 @@
+Use PySide6 Tools translating .ui file to .py file 
