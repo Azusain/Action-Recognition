@@ -87,6 +87,7 @@ def run(
     if webcam:
         view_img = check_imshow(warn=True)
         dataset = LoadStreams(source, img_size=imgsz, stride=stride, auto=pt, vid_stride=vid_stride)
+
         bs = len(dataset)
     elif screenshot:
         dataset = LoadScreenshots(source, img_size=imgsz, stride=stride, auto=pt)
@@ -98,8 +99,8 @@ def run(
     model.warmup(imgsz=(1 if pt or model.triton else bs, 3, *imgsz))  # warmup
     seen, windows, dt = 0, [], (Profile(), Profile(), Profile())
     for path, im, im0s, vid_cap, s in dataset:
-        if not uim.is_activated:
-            sys.exit(0)
+        if not uim.run_env.activated:
+            break
         with dt[0]:
             im = torch.from_numpy(im).to(model.device)
             im = im.half() if model.fp16 else im.float()  # uint8 to fp16/32
@@ -141,6 +142,11 @@ def run(
 
                 # Update QListWidget
                 uim.run_env.detectedList.clear()
+                # uim.run_env.detectedList = QListWidget()
+
+
+
+
 
                 # Display results
                 for c in det[:, 5].unique():
@@ -211,6 +217,7 @@ def run(
 
 def parse_opt():
     SOURCE_PATH = uim.run_env.webcam
+    # SOURCE_PATH = "https://www.youtube.com/watch?v=nq-DUt-PFF4"
     OUTPUT_PATH = ROOT / 'TestSrc'
 
     parser = argparse.ArgumentParser()
@@ -253,7 +260,16 @@ def main(opt):
 
 
 if __name__ == "__main__":
-    InterfaceThread().start()
-    while uim.run_env is None or not uim.run_env.activated:
-        time.sleep(1)
-    main(parse_opt())
+    try:
+        InterfaceThread().start()
+    except Exception as e:
+        LOGGER.info(e)
+
+    while True:
+        while uim.run_env is None or not uim.run_env.activated:
+            time.sleep(1)
+        try:
+            main(parse_opt())
+        except BaseException:
+            LOGGER.info("Runtime error")
+        uim.run_env.activated = False

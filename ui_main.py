@@ -2,6 +2,7 @@ import sys
 import threading
 import time
 
+import PySide6
 from PySide6.QtCore import (QCoreApplication, QDate, QDateTime, QLocale,
     QMetaObject, QObject, QPoint, QRect,
     QSize, QTime, QUrl, Qt)
@@ -14,7 +15,7 @@ from PySide6.QtWidgets import (QApplication, QLabel, QListWidget, QListWidgetIte
                                QMainWindow, QMenu, QMenuBar, QSizePolicy,
                                QSlider, QStatusBar, QWidget, QGridLayout, QHBoxLayout, QVBoxLayout, QSpacerItem,
                                QPushButton, QListView, QProgressBar, QFileDialog)
-from Status import RunningEnv
+from RuntimeEnv import RunningEnv
 
 
 ui = None
@@ -32,10 +33,6 @@ def update_canvas(canvas_widget, interval_sec=0.015):
         # main_ui.detected_list = QListWidget()
         # Try dynamic list-widget-item
         # main_ui.detected_list.clear()
-
-
-
-
         time.sleep(interval_sec)
 
 
@@ -52,7 +49,6 @@ class CanvasWidget(QLabel):
         if img_buf is not None:
             pixmap = QPixmap.fromImage(img_format_converter(img_buf))
             p.drawPixmap(0, 0, self.width(), self.height(), pixmap)
-            # p.drawLine(2,4,60,80)
         p.end()
 
 
@@ -70,7 +66,7 @@ class InterfaceThread(threading.Thread):
         # init interface
         global canvas, app, is_activated, ui, run_env
         app = QApplication(sys.argv)
-        ui = Ui_MainWindow()
+        ui = MainWindow()
         run_env = RunningEnv()
 
         canvas = ui.label
@@ -95,9 +91,11 @@ class InterfaceThread(threading.Thread):
 #
 
 
-class Ui_MainWindow(QMainWindow):
+class MainWindow(QMainWindow):
     def __init__(self):
-        super(Ui_MainWindow, self).__init__()
+        super(MainWindow, self).__init__()
+        # Popped Windows
+        self.pwu = None
         self.setupUi(self)
 
     def setupUi(self, MainWindow):
@@ -111,6 +109,7 @@ class Ui_MainWindow(QMainWindow):
 "	alternate-background-color: rgb(144, 144, 144);\n"
 "}\n"
 "")
+        # BasicWidgets
         self.actionSource = QMenu(MainWindow)
         self.actionSource.setObjectName(u"actionSource")
         self.actionScreenShot = QAction(MainWindow)
@@ -245,10 +244,6 @@ class Ui_MainWindow(QMainWindow):
         self.detected_list.setSpacing(4)
         self.detected_list.setSortingEnabled(False)
 
-
-
-
-
         self.verticalLayout_3.addWidget(self.detected_list)
 
         self.args_conf = QVBoxLayout()
@@ -335,7 +330,7 @@ class Ui_MainWindow(QMainWindow):
 
         # Slots Connections
         self.actionOutputPath.triggered.connect(self.set_output_path)
-        self.actionWebCam.triggered.connect(self.set_src_webcam)
+        self.actionWebCam.triggered.connect(self.pop_url_window)
         self.actionLocalFile.triggered.connect(self.set_src_local_file)
         self.btn_run.pressed.connect(self.set_runnable)
 
@@ -380,12 +375,14 @@ class Ui_MainWindow(QMainWindow):
         self.output_path.setText(file_name[-10:])
         return
 
-    def set_src_webcam(self):
-        webcam_url = "http://192.168.31.13:4747/video"
-        self.src_path.setText(webcam_url)
-        run_env.webcam = webcam_url
-        self.src_path_hint.setText(u"      WebCam\uff1a")
-        self.progressBar.setValue(100)
+    def pop_url_window(self):
+        self.pwu = PopWindowUrl(self)
+        self.pwu.show()
+        # webcam_url = "http://192.168.31.243:4747/video"
+        # self.src_path.setText(webcam_url)
+        # run_env.webcam = webcam_url
+        # self.src_path_hint.setText(u"      WebCam\uff1a")
+        # self.progressBar.setValue(100)
         return
 
     def set_src_local_file(self):
@@ -399,8 +396,33 @@ class Ui_MainWindow(QMainWindow):
         run_env.activated = True
 
 
-if __name__ == '__main__':
-    it = InterfaceThread()
-    it.start()
+class PopWindowUrl(QWidget):
+    def __init__(self, mw):
+        super().__init__()
+        self.parent_window = mw
+        self.activated = True
+        self.resize(400, 100)
+        horizon_layout = QHBoxLayout()
+        self.setLayout(horizon_layout)
+        self.text_set_url = PySide6.QtWidgets.QLineEdit()
+        horizon_layout.addWidget(self.text_set_url)
+        self.btn_set_url = QPushButton("Confirm")
+        horizon_layout.addWidget(self.btn_set_url)
+        horizon_layout.setStretch(3, 1)
+
+        # Slots Connections
+        self.btn_set_url.pressed.connect(self.set_url)
+
+    # Slot Functions
+    def set_url(self):
+        webcam_url = self.text_set_url.text()
+        print(webcam_url)
+        self.parent_window.src_path.setText(webcam_url)
+        run_env.webcam = webcam_url
+        self.parent_window.src_path_hint.setText(u"      WebCam\uff1a")
+        self.parent_window.progressBar.setValue(100)
+        self.hide()
+        del self
+
 
 
