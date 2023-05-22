@@ -25,10 +25,13 @@ from utils.torch_utils import select_device, smart_inference_mode
 import ui_main as uim
 from ui_main import update_canvas, img_format_converter
 from ui_main import InterfaceThread, CanvasWidget
-from PySide6.QtWidgets import QLabel, QApplication
+from PySide6.QtWidgets import QLabel, QApplication, QListWidget
 from PySide6.QtGui import QPixmap, QPainter
 
 import time
+
+
+
 
 @smart_inference_mode()
 def run(
@@ -117,7 +120,7 @@ def run(
         # pred = utils.general.apply_classifier(pred, classifier_model, im, im0s)
 
         # Process predictions
-        for i, det in enumerate(pred):  # per image
+        for i, det in enumerate(pred):
             seen += 1
             if webcam:  # batch_size >= 1
                 p, im0, frame = path[i], im0s[i].copy(), dataset.count
@@ -136,10 +139,16 @@ def run(
                 # Rescale boxes from img_size to im0 size
                 det[:, :4] = scale_boxes(im.shape[2:], det[:, :4], im0.shape).round()
 
-                # Print results
+                # Update QListWidget
+                uim.run_env.detectedList.clear()
+
+                # Display results
                 for c in det[:, 5].unique():
                     n = (det[:, 5] == c).sum()  # detections per class
-                    s += f"{n} {names[int(c)]}{'s' * (n > 1)}, "  # add to string
+                    object_info = f"{n} {names[int(c)]}{'s' * (n > 1)} "
+                    s += object_info  # add to string
+                    # uim.run_env.detected_list = QListWidget()
+                    uim.run_env.detectedList.addItem(object_info)
 
                 # Write results
                 for *xyxy, conf, cls in reversed(det):                      # iterations in each det Area
