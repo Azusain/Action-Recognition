@@ -17,22 +17,25 @@ from PySide6.QtWidgets import (QApplication, QLabel, QListWidget, QListWidgetIte
 from Status import RunningEnv
 
 
-main_ui = None
+ui = None
 canvas = None
 app = None
 is_activated = True
 img_buf = None
 run_env = None
 
-def change_global_var(img):
-    global img_buf
-    img_buf = img
-
 
 def update_canvas(canvas_widget, interval_sec=0.015):
-    global is_activated
+    global is_activated, ui
     while is_activated:
         canvas_widget.update()
+        # main_ui.detected_list = QListWidget()
+        # Try dynamic list-widget-item
+        # main_ui.detected_list.clear()
+
+
+
+
         time.sleep(interval_sec)
 
 
@@ -65,14 +68,15 @@ class InterfaceThread(threading.Thread):
 
     def run(self):
         # init interface
-        global canvas, app, is_activated, main_ui, run_env
+        global canvas, app, is_activated, ui, run_env
         app = QApplication(sys.argv)
+        ui = Ui_MainWindow()
         run_env = RunningEnv()
-        main_ui = Ui_MainWindow()
-        canvas = main_ui.label
-        main_ui.show()
+
+        canvas = ui.label
+        ui.show()
         # sub-thread for updating canvas
-        threading.Thread(target=update_canvas, args=(main_ui.label,), name="ui_flash_thread").start()
+        threading.Thread(target=update_canvas, args=(ui.label,), name="ui_flash_thread").start()
         # main interface
         app.exec()
         is_activated = False
@@ -227,13 +231,9 @@ class Ui_MainWindow(QMainWindow):
 
         self.verticalLayout_3 = QVBoxLayout()
         self.verticalLayout_3.setObjectName(u"verticalLayout_3")
+
+        # Detected List
         self.detected_list = QListWidget(self.centralwidget)
-        QListWidgetItem(self.detected_list)
-        QListWidgetItem(self.detected_list)
-        QListWidgetItem(self.detected_list)
-        QListWidgetItem(self.detected_list)
-        QListWidgetItem(self.detected_list)
-        QListWidgetItem(self.detected_list)
         self.detected_list.setObjectName(u"detected_list")
         self.detected_list.setStyleSheet(u"font: 15pt \"Cascadia Code\";\n"
 "color: rgb(255, 255, 255);\n"
@@ -244,6 +244,10 @@ class Ui_MainWindow(QMainWindow):
         self.detected_list.setLayoutMode(QListView.SinglePass)
         self.detected_list.setSpacing(4)
         self.detected_list.setSortingEnabled(False)
+
+
+
+
 
         self.verticalLayout_3.addWidget(self.detected_list)
 
@@ -357,21 +361,9 @@ class Ui_MainWindow(QMainWindow):
         self.btn_run.setText(QCoreApplication.translate("MainWindow", u"Run", None))
         self.btn_teminate.setText(QCoreApplication.translate("MainWindow", u"Terminate", None))
 
-        __sortingEnabled = self.detected_list.isSortingEnabled()
-        self.detected_list.setSortingEnabled(False)
-        ___qlistwidgetitem = self.detected_list.item(0)
-        ___qlistwidgetitem.setText(QCoreApplication.translate("MainWindow", u"Man 01   (200,400) to (500, 800)", None));
-        ___qlistwidgetitem1 = self.detected_list.item(1)
-        ___qlistwidgetitem1.setText(QCoreApplication.translate("MainWindow", u"Man 02   (200,400) to (500, 800)", None));
-        ___qlistwidgetitem2 = self.detected_list.item(2)
-        ___qlistwidgetitem2.setText(QCoreApplication.translate("MainWindow", u"Women   (200,400) to (500, 800)", None));
-        ___qlistwidgetitem3 = self.detected_list.item(3)
-        ___qlistwidgetitem3.setText(QCoreApplication.translate("MainWindow", u"Women   (200,400) to (500, 800)", None));
-        ___qlistwidgetitem4 = self.detected_list.item(4)
-        ___qlistwidgetitem4.setText(QCoreApplication.translate("MainWindow", u"Cat      (200,400) to (500, 800)", None));
-        ___qlistwidgetitem5 = self.detected_list.item(5)
-        ___qlistwidgetitem5.setText(QCoreApplication.translate("MainWindow", u"Dog     (200,400) to (500, 800)", None));
-        self.detected_list.setSortingEnabled(__sortingEnabled)
+        # Detected List Items
+        # Empty Now~
+
 
         self.model_chosen.setText(QCoreApplication.translate("MainWindow", u"Model: yolov5s.pt", None))
         self.label_3.setText(QCoreApplication.translate("MainWindow", u"args_0", None))
@@ -389,7 +381,7 @@ class Ui_MainWindow(QMainWindow):
         return
 
     def set_src_webcam(self):
-        webcam_url = "http://192.168.31.243:4747/video"
+        webcam_url = "http://192.168.31.13:4747/video"
         self.src_path.setText(webcam_url)
         run_env.webcam = webcam_url
         self.src_path_hint.setText(u"      WebCam\uff1a")

@@ -7,7 +7,7 @@ from pathlib import Path
 
 import torch
 
-show_cv_window = False
+
 
 FILE = Path(__file__).resolve()
 ROOT = FILE.parents[0]  # YOLOv5 root directory
@@ -107,7 +107,7 @@ def run(
         # Inference
         with dt[1]:
             visualize = increment_path(save_dir / Path(path).stem, mkdir=True) if visualize else False
-            pred = model(im, augment=augment, visualize=visualize)
+            pred = model(im, augment=augment, visualize=visualize)              # Get Output from model Here!
 
         # NMS
         with dt[2]:
@@ -161,7 +161,7 @@ def run(
             im0 = annotator.result()
             uim.img_buf = im0
 
-            if show_cv_window:
+            if uim.run_env.show_cv_window:
                 if platform.system() == 'Linux' and p not in windows:
                     windows.append(p)
                     cv2.namedWindow(str(p), cv2.WINDOW_NORMAL | cv2.WINDOW_KEEPRATIO)  # allow window resize (Linux)
