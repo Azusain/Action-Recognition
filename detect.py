@@ -7,7 +7,7 @@ from pathlib import Path
 
 import torch
 
-show_cv_window = False
+
 
 FILE = Path(__file__).resolve()
 ROOT = FILE.parents[0]  # YOLOv5 root directory
@@ -25,10 +25,13 @@ from utils.torch_utils import select_device, smart_inference_mode
 import ui_main as uim
 from ui_main import update_canvas, img_format_converter
 from ui_main import InterfaceThread, CanvasWidget
-from PySide6.QtWidgets import QLabel, QApplication
+from PySide6.QtWidgets import QLabel, QApplication, QListWidget
 from PySide6.QtGui import QPixmap, QPainter
 
 import time
+
+
+
 
 @smart_inference_mode()
 def run(
@@ -84,6 +87,7 @@ def run(
     if webcam:
         view_img = check_imshow(warn=True)
         dataset = LoadStreams(source, img_size=imgsz, stride=stride, auto=pt, vid_stride=vid_stride)
+
         bs = len(dataset)
     elif screenshot:
         dataset = LoadScreenshots(source, img_size=imgsz, stride=stride, auto=pt)
@@ -95,8 +99,8 @@ def run(
     model.warmup(imgsz=(1 if pt or model.triton else bs, 3, *imgsz))  # warmup
     seen, windows, dt = 0, [], (Profile(), Profile(), Profile())
     for path, im, im0s, vid_cap, s in dataset:
-        if not uim.is_activated:
-            sys.exit(0)
+        if not uim.run_env.activated:
+            break
         with dt[0]:
             im = torch.from_numpy(im).to(model.device)
             im = im.half() if model.fp16 else im.float()  # uint8 to fp16/32
@@ -107,7 +111,7 @@ def run(
         # Inference
         with dt[1]:
             visualize = increment_path(save_dir / Path(path).stem, mkdir=True) if visualize else False
-            pred = model(im, augment=augment, visualize=visualize)
+            pred = model(im, augment=augment, visualize=visualize)              # Get Output from model Here!
 
         # NMS
         with dt[2]:
@@ -117,7 +121,7 @@ def run(
         # pred = utils.general.apply_classifier(pred, classifier_model, im, im0s)
 
         # Process predictions
-        for i, det in enumerate(pred):  # per image
+        for i, det in enumerate(pred):
             seen += 1
             if webcam:  # batch_size >= 1
                 p, im0, frame = path[i], im0s[i].copy(), dataset.count
@@ -136,10 +140,21 @@ def run(
                 # Rescale boxes from img_size to im0 size
                 det[:, :4] = scale_boxes(im.shape[2:], det[:, :4], im0.shape).round()
 
-                # Print results
+                # Update QListWidget
+                uim.run_env.detectedList.clear()
+                # uim.run_env.detectedList = QListWidget()
+
+
+
+
+
+                # Display results
                 for c in det[:, 5].unique():
                     n = (det[:, 5] == c).sum()  # detections per class
-                    s += f"{n} {names[int(c)]}{'s' * (n > 1)}, "  # add to string
+                    object_info = f"{n} {names[int(c)]}{'s' * (n > 1)} "
+                    s += object_info  # add to string
+                    # uim.run_env.detected_list = QListWidget()
+                    uim.run_env.detectedList.addItem(object_info)
 
                 # Write results
                 for *xyxy, conf, cls in reversed(det):                      # iterations in each det Area
@@ -161,7 +176,7 @@ def run(
             im0 = annotator.result()
             uim.img_buf = im0
 
-            if show_cv_window:
+            if uim.run_env.show_cv_window:
                 if platform.system() == 'Linux' and p not in windows:
                     windows.append(p)
                     cv2.namedWindow(str(p), cv2.WINDOW_NORMAL | cv2.WINDOW_KEEPRATIO)  # allow window resize (Linux)
@@ -202,6 +217,7 @@ def run(
 
 def parse_opt():
     SOURCE_PATH = uim.run_env.webcam
+    # SOURCE_PATH = "https://www.youtube.com/watch?v=nq-DUt-PFF4"
     OUTPUT_PATH = ROOT / 'TestSrc'
 
     parser = argparse.ArgumentParser()
@@ -244,7 +260,16 @@ def main(opt):
 
 
 if __name__ == "__main__":
-    InterfaceThread().start()
-    while uim.run_env is None or not uim.run_env.activated:
-        time.sleep(1)
-    main(parse_opt())
+    try:
+        InterfaceThread().start()
+    except Exception as e:
+        LOGGER.info(e)
+
+    while True:
+        while uim.run_env is None or not uim.run_env.activated:
+            time.sleep(1)
+        try:
+            main(parse_opt())
+        except BaseException:
+            LOGGER.info("Runtime error")
+        uim.run_env.activated = False
