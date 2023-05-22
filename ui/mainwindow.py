@@ -1,6 +1,13 @@
+# -*- coding: utf-8 -*-
 import sys
-import threading
-import time
+
+################################################################################
+## Form generated from reading UI file 'mainwindow.ui'
+##
+## Created by: Qt User Interface Compiler version 6.5.0
+##
+## WARNING! All changes made in this file will be lost when recompiling UI file!
+################################################################################
 
 from PySide6.QtCore import (QCoreApplication, QDate, QDateTime, QLocale,
     QMetaObject, QObject, QPoint, QRect,
@@ -10,86 +17,14 @@ from PySide6.QtGui import (QAction, QBrush, QColor, QConicalGradient,
     QIcon, QImage, QKeySequence, QLinearGradient,
     QPainter, QPalette, QPixmap, QRadialGradient,
     QTransform)
-from PySide6.QtWidgets import (QApplication, QLabel, QListWidget, QListWidgetItem,
-                               QMainWindow, QMenu, QMenuBar, QSizePolicy,
-                               QSlider, QStatusBar, QWidget, QGridLayout, QHBoxLayout, QVBoxLayout, QSpacerItem,
-                               QPushButton, QListView, QProgressBar, QFileDialog)
-from Status import RunningEnv
+from PySide6.QtWidgets import (QApplication, QGridLayout, QHBoxLayout, QLabel,
+    QListView, QListWidget, QListWidgetItem, QMainWindow,
+    QMenu, QMenuBar, QProgressBar, QPushButton,
+    QSizePolicy, QSpacerItem, QVBoxLayout, QWidget, QFileDialog)
 
-
-main_ui = None
-canvas = None
-app = None
-is_activated = True
-img_buf = None
-run_env = None
-
-def change_global_var(img):
-    global img_buf
-    img_buf = img
-
-
-def update_canvas(canvas_widget, interval_sec=0.015):
-    global is_activated
-    while is_activated:
-        canvas_widget.update()
-        time.sleep(interval_sec)
-
-
-class CanvasWidget(QLabel):
-    def __init__(self, cw):
-        super().__init__(cw)
-
-    def paintEvent(self, event):
-        global img_buf
-
-        # tmp
-        p = QPainter()
-        p.begin(self)
-        if img_buf is not None:
-            pixmap = QPixmap.fromImage(img_format_converter(img_buf))
-            p.drawPixmap(0, 0, self.width(), self.height(), pixmap)
-            # p.drawLine(2,4,60,80)
-        p.end()
-
-
-def img_format_converter(cv_img) -> QImage:
-    qt_img = QImage(cv_img.data, cv_img.shape[1], cv_img.shape[0], QImage.Format_RGB888)
-    qt_img.rgbSwap()
-    return qt_img
-
-
-class InterfaceThread(threading.Thread):
-    def __init__(self):
-        super().__init__(name="ui_main_thread")
-
-    def run(self):
-        # init interface
-        global canvas, app, is_activated, main_ui, run_env
-        app = QApplication(sys.argv)
-        run_env = RunningEnv()
-        main_ui = Ui_MainWindow()
-        canvas = main_ui.label
-        main_ui.show()
-        # sub-thread for updating canvas
-        threading.Thread(target=update_canvas, args=(main_ui.label,), name="ui_flash_thread").start()
-        # main interface
-        app.exec()
-        is_activated = False
-
-
-#   To setup ui from qt_generated code, try this below
-#   INHERIT FROM:
-#       QMainWindow
-#   OBJECT INIT:
-#       def __init__(self):
-#           super(Ui_MainWindow, self).__init__()
-#           self.setupUi(self)
-#
-#   CANVAS INIT:
-#       self.label = CanvasWidget(self.centralwidget)
-#
-
+# tmp global vars
+source_path = None
+output_path = None
 
 class Ui_MainWindow(QMainWindow):
     def __init__(self):
@@ -137,7 +72,7 @@ class Ui_MainWindow(QMainWindow):
         self.horizontalLayout.setObjectName(u"horizontalLayout")
         self.verticalLayout_2 = QVBoxLayout()
         self.verticalLayout_2.setObjectName(u"verticalLayout_2")
-        self.label = CanvasWidget(self.centralwidget)
+        self.label = QLabel(self.centralwidget)
         self.label.setObjectName(u"label")
         self.label.setStyleSheet(u"background-color: rgb(0, 0, 0);")
 
@@ -333,7 +268,7 @@ class Ui_MainWindow(QMainWindow):
         self.actionOutputPath.triggered.connect(self.set_output_path)
         self.actionWebCam.triggered.connect(self.set_src_webcam)
         self.actionLocalFile.triggered.connect(self.set_src_local_file)
-        self.btn_run.pressed.connect(self.set_runnable)
+
 
 
         self.detected_list.setCurrentRow(-1)
@@ -381,7 +316,6 @@ class Ui_MainWindow(QMainWindow):
         self.menuAbout.setTitle(QCoreApplication.translate("MainWindow", u"About", None))
         self.menuTools.setTitle(QCoreApplication.translate("MainWindow", u"Tools", None))
         self.actionSource.setTitle(QCoreApplication.translate("MainWindow", u"Source", None))
-
     # customized slot functions
     def set_output_path(self):
         file_name, file_type = QFileDialog.getOpenFileName()
@@ -389,11 +323,8 @@ class Ui_MainWindow(QMainWindow):
         return
 
     def set_src_webcam(self):
-        webcam_url = "http://192.168.31.243:4747/video"
-        self.src_path.setText(webcam_url)
-        run_env.webcam = webcam_url
+        self.src_path.setText("192.168.31.217:4747")
         self.src_path_hint.setText(u"      WebCam\uff1a")
-        self.progressBar.setValue(100)
         return
 
     def set_src_local_file(self):
@@ -402,13 +333,11 @@ class Ui_MainWindow(QMainWindow):
         self.src_path_hint.setText(u"      Local\uff1a")
         return
 
-    def set_runnable(self):
-        global run_env
-        run_env.activated = True
-
 
 if __name__ == '__main__':
-    it = InterfaceThread()
-    it.start()
+    app = QApplication(sys.argv)
+    mw = Ui_MainWindow()
+    mw.show()
+    app.exec()
 
 

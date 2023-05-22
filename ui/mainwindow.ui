@@ -28,6 +28,12 @@
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
+  <property name="styleSheet">
+   <string notr="true">QListWidget::item{
+	alternate-background-color: rgb(144, 144, 144);
+}
+</string>
+  </property>
   <widget class="QWidget" name="centralwidget">
    <property name="enabled">
     <bool>true</bool>
@@ -51,7 +57,9 @@
     </size>
    </property>
    <property name="styleSheet">
-    <string notr="true">background-color: rgb(38, 38, 38);</string>
+    <string notr="true">background-color: rgb(38, 38, 38);
+
+</string>
    </property>
    <layout class="QGridLayout" name="gridLayout">
     <property name="leftMargin">
@@ -82,48 +90,271 @@
            <string notr="true">background-color: rgb(0, 0, 0);</string>
           </property>
           <property name="text">
-           <string>TextLabel</string>
+           <string/>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QLabel" name="label_2">
-          <property name="text">
-           <string>TextLabel</string>
-          </property>
-         </widget>
+         <layout class="QVBoxLayout" name="verticalLayout_4" stretch="1,1,1">
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_5">
+            <item>
+             <widget class="QLabel" name="src_path_hint">
+              <property name="styleSheet">
+               <string notr="true">font: 20pt &quot;Cascadia Code SemiBold&quot;;
+color: rgb(255, 255, 255);</string>
+              </property>
+              <property name="text">
+               <string>      Source：</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="src_path">
+              <property name="styleSheet">
+               <string notr="true">font: 15pt &quot;Cascadia Code&quot;;
+color: rgb(255, 255, 255);
+</string>
+              </property>
+              <property name="text">
+               <string>Empty</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_2">
+            <item>
+             <widget class="QLabel" name="output_path_hint">
+              <property name="styleSheet">
+               <string notr="true">font: 20pt &quot;Cascadia Code SemiBold&quot;;
+color: rgb(255, 255, 255);</string>
+              </property>
+              <property name="text">
+               <string>      Output to：</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="output_path">
+              <property name="styleSheet">
+               <string notr="true">font: 15pt &quot;Cascadia Code&quot;;
+color: rgb(255, 255, 255);</string>
+              </property>
+              <property name="text">
+               <string>Empty</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_4">
+            <item>
+             <spacer name="horizontalSpacer">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item>
+             <widget class="QPushButton" name="btn_run">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="styleSheet">
+               <string notr="true">font: 12pt &quot;Cascadia Code&quot;;
+color: rgb(255, 255, 255);
+background-color: rgb(72, 72, 72);
+</string>
+              </property>
+              <property name="text">
+               <string>Run</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="horizontalSpacer_2">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item>
+             <widget class="QPushButton" name="btn_teminate">
+              <property name="styleSheet">
+               <string notr="true">font: 12pt &quot;Cascadia Code&quot;;
+color: rgb(255, 255, 255);
+background-color: rgb(72, 72, 72);</string>
+              </property>
+              <property name="text">
+               <string>Terminate</string>
+              </property>
+              <property name="iconSize">
+               <size>
+                <width>12</width>
+                <height>12</height>
+               </size>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="horizontalSpacer_3">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
+          </item>
+         </layout>
         </item>
        </layout>
       </item>
       <item>
-       <layout class="QVBoxLayout" name="verticalLayout_3" stretch="2,2,2,1">
+       <layout class="QVBoxLayout" name="verticalLayout_3" stretch="2,2,1">
         <item>
-         <widget class="QCalendarWidget" name="calendarWidget"/>
-        </item>
-        <item>
-         <widget class="QLCDNumber" name="lcdNumber">
-          <property name="digitCount">
-           <number>8</number>
+         <widget class="QListWidget" name="detected_list">
+          <property name="styleSheet">
+           <string notr="true">font: 15pt &quot;Cascadia Code&quot;;
+color: rgb(255, 255, 255);
+border:1px solid gray;
+background-color: rgb(50, 50, 50);
+</string>
           </property>
-          <property name="mode">
-           <enum>QLCDNumber::Bin</enum>
+          <property name="alternatingRowColors">
+           <bool>true</bool>
           </property>
-          <property name="segmentStyle">
-           <enum>QLCDNumber::Filled</enum>
+          <property name="layoutMode">
+           <enum>QListView::SinglePass</enum>
           </property>
-          <property name="value" stdset="0">
-           <double>203.000000000000000</double>
+          <property name="spacing">
+           <number>4</number>
           </property>
-          <property name="intValue" stdset="0">
-           <number>203</number>
+          <property name="currentRow">
+           <number>-1</number>
           </property>
+          <property name="sortingEnabled">
+           <bool>false</bool>
+          </property>
+          <item>
+           <property name="text">
+            <string>Man 01   (200,400) to (500, 800)</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Man 02   (200,400) to (500, 800)</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Women   (200,400) to (500, 800)</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Women   (200,400) to (500, 800)</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Cat      (200,400) to (500, 800)</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Dog     (200,400) to (500, 800)</string>
+           </property>
+          </item>
          </widget>
         </item>
         <item>
-         <widget class="QGraphicsView" name="graphicsView"/>
+         <layout class="QVBoxLayout" name="args_conf">
+          <item>
+           <widget class="QLabel" name="model_chosen">
+            <property name="styleSheet">
+             <string notr="true">font: 15pt &quot;Cascadia Code&quot;;
+color: rgb(255, 255, 255);</string>
+            </property>
+            <property name="text">
+             <string>Model: yolov5s.pt</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="label_3">
+            <property name="styleSheet">
+             <string notr="true">font: 15pt &quot;Cascadia Code&quot;;
+color: rgb(255, 255, 255);</string>
+            </property>
+            <property name="text">
+             <string>args_0</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="other_args">
+            <property name="styleSheet">
+             <string notr="true">font: 15pt &quot;Cascadia Code&quot;;
+color: rgb(255, 255, 255);</string>
+            </property>
+            <property name="text">
+             <string>args_1</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="label_2">
+            <property name="styleSheet">
+             <string notr="true">font: 15pt &quot;Cascadia Code&quot;;
+color: rgb(255, 255, 255);</string>
+            </property>
+            <property name="text">
+             <string>args_2</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
         </item>
         <item>
          <widget class="QProgressBar" name="progressBar">
+          <property name="mouseTracking">
+           <bool>true</bool>
+          </property>
+          <property name="layoutDirection">
+           <enum>Qt::LeftToRight</enum>
+          </property>
+          <property name="autoFillBackground">
+           <bool>false</bool>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">color: rgb(255, 255, 255);
+font: 15pt &quot;Cascadia Code&quot;;
+</string>
+          </property>
           <property name="value">
            <number>24</number>
           </property>
@@ -149,7 +380,7 @@
      <string>Settings</string>
     </property>
     <addaction name="actionSource"/>
-    <addaction name="actionDestinationPath"/>
+    <addaction name="actionOutputPath"/>
    </widget>
    <widget class="QMenu" name="menuAbout">
     <property name="title">
@@ -176,27 +407,27 @@
     <string>ScreenShot</string>
    </property>
   </action>
-  <action name="actionDestinationPath">
+  <action name="actionOutputPath">
    <property name="text">
-    <string>DestinationPath</string>
+    <string>Output Path</string>
    </property>
   </action>
  </widget>
  <resources/>
  <connections>
   <connection>
-   <sender>actionSource</sender>
+   <sender>actionOutputPath</sender>
    <signal>triggered()</signal>
-   <receiver>progressBar</receiver>
-   <slot>raise()</slot>
+   <receiver>MainWindow</receiver>
+   <slot>close()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>-1</x>
      <y>-1</y>
     </hint>
     <hint type="destinationlabel">
-     <x>768</x>
-     <y>528</y>
+     <x>479</x>
+     <y>269</y>
     </hint>
    </hints>
   </connection>

@@ -2,6 +2,7 @@ import argparse
 import os
 import platform
 import sys
+import threading
 from pathlib import Path
 
 import torch
@@ -26,6 +27,8 @@ from ui_main import update_canvas, img_format_converter
 from ui_main import InterfaceThread, CanvasWidget
 from PySide6.QtWidgets import QLabel, QApplication
 from PySide6.QtGui import QPixmap, QPainter
+
+import time
 
 @smart_inference_mode()
 def run(
@@ -198,9 +201,7 @@ def run(
 
 
 def parse_opt():
-    # SOURCE_PATH = "TestSrc/src.mp4"
-    SOURCE_PATH = "https://www.youtube.com/watch?v=IrWfhbqURC4"
-    # SOURCE_PATH = "http://192.168.31.243:4747/video"
+    SOURCE_PATH = uim.run_env.webcam
     OUTPUT_PATH = ROOT / 'TestSrc'
 
     parser = argparse.ArgumentParser()
@@ -244,5 +245,6 @@ def main(opt):
 
 if __name__ == "__main__":
     InterfaceThread().start()
-    opt = parse_opt()
-    main(opt)
+    while uim.run_env is None or not uim.run_env.activated:
+        time.sleep(1)
+    main(parse_opt())
