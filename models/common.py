@@ -318,7 +318,7 @@ class DetectMultiBackend(nn.Module):
     def __init__(self, weights='yolov5s.pt', device=torch.device('cpu'), dnn=False, data=None, fp16=False, fuse=True):
         # Usage:
         #   PyTorch:              weights = *.pt
-        #   TorchScript:                    *.torchscript
+        #   TorchScript:                    *.torchMscript
         #   ONNX Runtime:                   *.onnx
         #   ONNX OpenCV DNN:                *.onnx --dnn
         #   OpenVINO:                       *_openvino_model

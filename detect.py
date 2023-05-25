@@ -144,10 +144,6 @@ def run(
                 uim.run_env.detectedList.clear()
                 # uim.run_env.detectedList = QListWidget()
 
-
-
-
-
                 # Display results
                 for c in det[:, 5].unique():
                     n = (det[:, 5] == c).sum()  # detections per class

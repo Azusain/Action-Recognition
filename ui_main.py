@@ -416,7 +416,6 @@ class PopWindowUrl(QWidget):
     # Slot Functions
     def set_url(self):
         webcam_url = self.text_set_url.text()
-        print(webcam_url)
         self.parent_window.src_path.setText(webcam_url)
         run_env.webcam = webcam_url
         self.parent_window.src_path_hint.setText(u"      WebCam\uff1a")
