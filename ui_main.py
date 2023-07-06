@@ -14,7 +14,7 @@ from PySide6.QtGui import (QAction, QBrush, QColor, QConicalGradient,
 from PySide6.QtWidgets import (QApplication, QLabel, QListWidget, QListWidgetItem,
                                QMainWindow, QMenu, QMenuBar, QSizePolicy,
                                QSlider, QStatusBar, QWidget, QGridLayout, QHBoxLayout, QVBoxLayout, QSpacerItem,
-                               QPushButton, QListView, QProgressBar, QFileDialog)
+                               QPushButton, QListView, QProgressBar, QFileDialog, QPlainTextEdit)
 from RuntimeEnv import RunningEnv
 
 
@@ -68,7 +68,6 @@ class InterfaceThread(threading.Thread):
         app = QApplication(sys.argv)
         ui = MainWindow()
         run_env = RunningEnv()
-
         canvas = ui.label
         ui.show()
         # sub-thread for updating canvas
@@ -78,24 +77,13 @@ class InterfaceThread(threading.Thread):
         is_activated = False
 
 
-#   To setup ui from qt_generated code, try this below
-#   INHERIT FROM:
-#       QMainWindow
-#   OBJECT INIT:
-#       def __init__(self):
-#           super(Ui_MainWindow, self).__init__()
-#           self.setupUi(self)
-#
-#   CANVAS INIT:
-#       self.label = CanvasWidget(self.centralwidget)
-#
-
-
 class MainWindow(QMainWindow):
     def __init__(self):
         super(MainWindow, self).__init__()
         # Popped Windows
-        self.pwu = None
+        self.btn_more_opt = None
+        self.pwu = None  # Instance of PopWindowUrl
+        self.pwc = None
         self.setupUi(self)
 
     def setupUi(self, MainWindow):
@@ -246,6 +234,7 @@ class MainWindow(QMainWindow):
 
         self.verticalLayout_3.addWidget(self.detected_list)
 
+        # args_conf is used for displaying and configuring start-up options
         self.args_conf = QVBoxLayout()
         self.args_conf.setObjectName(u"args_conf")
         self.model_chosen = QLabel(self.centralwidget)
@@ -276,6 +265,11 @@ class MainWindow(QMainWindow):
 
         self.args_conf.addWidget(self.label_2)
 
+        # configure more options by clicking this btn
+        self.btn_more_opt = QPushButton('More Options')
+        self.btn_more_opt.setStyleSheet(u"font: 12pt \"Cascadia Code\";\n"
+"color: rgb(255, 255, 255);\n")
+        self.args_conf.addWidget(self.btn_more_opt)
 
         self.verticalLayout_3.addLayout(self.args_conf)
 
@@ -331,6 +325,7 @@ class MainWindow(QMainWindow):
         # Slots Connections
         self.actionOutputPath.triggered.connect(self.set_output_path)
         self.actionWebCam.triggered.connect(self.pop_url_window)
+        self.btn_more_opt.pressed.connect(self.pop_conf_window)
         self.actionLocalFile.triggered.connect(self.set_src_local_file)
         self.btn_run.pressed.connect(self.set_runnable)
 
@@ -378,11 +373,11 @@ class MainWindow(QMainWindow):
     def pop_url_window(self):
         self.pwu = PopWindowUrl(self)
         self.pwu.show()
-        # webcam_url = "http://192.168.31.243:4747/video"
-        # self.src_path.setText(webcam_url)
-        # run_env.webcam = webcam_url
-        # self.src_path_hint.setText(u"      WebCam\uff1a")
-        # self.progressBar.setValue(100)
+        return
+
+    def pop_conf_window(self):
+        self.pwc = PopWindowConf(self)
+        self.pwc.show()
         return
 
     def set_src_local_file(self):
@@ -422,6 +417,45 @@ class PopWindowUrl(QWidget):
         self.parent_window.progressBar.setValue(100)
         self.hide()
         del self
+
+
+class PopWindowConf(QWidget):
+    def __init__(self, mw):
+        super().__init__()
+        self.setWindowTitle("Configuration")
+        self.parent_window = mw
+        self.resize(400, 800)
+        vertical_layout = QVBoxLayout()
+        self.setLayout(vertical_layout)
+        self.cfg_text = QPlainTextEdit()
+        self.btn_save = QPushButton("Save")
+
+        self.load_conf_file()
+        vertical_layout.addWidget(self.cfg_text)
+        vertical_layout.addWidget(self.btn_save)
+        self.btn_save.pressed.connect(self.set_conf_file)
+        # Slots Connections
+
+    def load_conf_file(self):
+
+        if run_env is not None:
+            with open(run_env.conf_file_path, 'r') as file:
+                data = file.read()
+                self.cfg_text.setPlainText(data)
+                file.close()
+        run_env.parse_conf_file()
+        return
+
+    def set_conf_file(self):
+        if run_env is not None:
+            with open(run_env.conf_file_path, 'w') as file:
+                file.write(self.cfg_text.toPlainText())
+                file.close()
+        run_env.parse_conf_file()
+        return
+
+
+    # Slot Functions
 
 
 
