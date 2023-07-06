@@ -12,14 +12,19 @@ class RunningEnv:
         self.webcam = None
         self.conf_file_path = "./configurations/startup.cfg"
         self.conf_list = {}
+        self.parse_conf_file()
 
     def parse_conf_file(self):
         with open(self.conf_file_path, 'r') as f:
             while True:
                 k_raw = f.readline()
-                if k_raw is None:
+                if k_raw == "":
                     break
                 k = k_raw.replace(":", "")
                 v = f.readline()
-                self.conf_list[k] = v
+                self.conf_list[k.replace("\n", "")] = v.replace("\n", "")
+        print(self.conf_list)
 
+    def update_interface(self):
+        uim.ui.src_path = self.conf_list['source']
+        uim.ui.src_path = self.conf_list['output']

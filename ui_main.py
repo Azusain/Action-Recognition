@@ -65,9 +65,11 @@ class InterfaceThread(threading.Thread):
     def run(self):
         # init interface
         global canvas, app, is_activated, ui, run_env
+
         app = QApplication(sys.argv)
         ui = MainWindow()
         run_env = RunningEnv()
+        print("run_env has initiated")
         canvas = ui.label
         ui.show()
         # sub-thread for updating canvas
@@ -97,7 +99,7 @@ class MainWindow(QMainWindow):
 "	alternate-background-color: rgb(144, 144, 144);\n"
 "}\n"
 "")
-        # BasicWidgets
+        # Menubar
         self.actionSource = QMenu(MainWindow)
         self.actionSource.setObjectName(u"actionSource")
         self.actionScreenShot = QAction(MainWindow)
@@ -119,6 +121,7 @@ class MainWindow(QMainWindow):
         self.centralwidget.setStyleSheet(u"background-color: rgb(38, 38, 38);\n"
 "\n"
 "")
+        # basic layout
         self.gridLayout = QGridLayout(self.centralwidget)
         self.gridLayout.setSpacing(0)
         self.gridLayout.setObjectName(u"gridLayout")
@@ -138,6 +141,9 @@ class MainWindow(QMainWindow):
         self.verticalLayout_4.setObjectName(u"verticalLayout_4")
         self.horizontalLayout_5 = QHBoxLayout()
         self.horizontalLayout_5.setObjectName(u"horizontalLayout_5")
+
+        # src and output path:
+        # label with its name ending with _hint represents for ui constants
         self.src_path_hint = QLabel(self.centralwidget)
         self.src_path_hint.setObjectName(u"src_path_hint")
         self.src_path_hint.setStyleSheet(u"font: 20pt \"Cascadia Code SemiBold\";\n"
@@ -171,6 +177,8 @@ class MainWindow(QMainWindow):
         self.horizontalLayout_4.setObjectName(u"horizontalLayout_4")
         self.horizontalSpacer = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
         self.horizontalLayout_4.addItem(self.horizontalSpacer)
+
+        # run and terminate buttons
         self.btn_run = QPushButton(self.centralwidget)
         self.btn_run.setObjectName(u"btn_run")
         sizePolicy1 = QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
@@ -354,7 +362,6 @@ class MainWindow(QMainWindow):
         # Detected List Items
         # Empty Now~
 
-
         self.model_chosen.setText(QCoreApplication.translate("MainWindow", u"Model: yolov5s.pt", None))
         self.label_3.setText(QCoreApplication.translate("MainWindow", u"args_0", None))
         self.other_args.setText(QCoreApplication.translate("MainWindow", u"args_1", None))
@@ -430,6 +437,7 @@ class PopWindowConf(QWidget):
         self.cfg_text = QPlainTextEdit()
         self.btn_save = QPushButton("Save")
 
+        print("PopWindowConf initiates")
         self.load_conf_file()
         vertical_layout.addWidget(self.cfg_text)
         vertical_layout.addWidget(self.btn_save)
@@ -438,12 +446,10 @@ class PopWindowConf(QWidget):
 
     def load_conf_file(self):
 
-        if run_env is not None:
-            with open(run_env.conf_file_path, 'r') as file:
-                data = file.read()
-                self.cfg_text.setPlainText(data)
-                file.close()
-        run_env.parse_conf_file()
+        with open(run_env.conf_file_path, 'r') as file:
+            data = file.read()
+            self.cfg_text.setPlainText(data)
+            file.close()
         return
 
     def set_conf_file(self):
@@ -452,6 +458,7 @@ class PopWindowConf(QWidget):
                 file.write(self.cfg_text.toPlainText())
                 file.close()
         run_env.parse_conf_file()
+        run_env.update_interface()
         return
 
 
