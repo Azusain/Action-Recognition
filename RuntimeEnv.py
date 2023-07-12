@@ -1,4 +1,3 @@
-from PySide6.QtWidgets import QListWidget
 import ui_main as uim
 
 

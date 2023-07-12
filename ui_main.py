@@ -47,6 +47,7 @@ class CanvasWidget(QLabel):
         p = QPainter()
         p.begin(self)
         if img_buf is not None:
+            # Attention here! It's needed indeed to transform cv2 format to qt format
             pixmap = QPixmap.fromImage(img_format_converter(img_buf))
             p.drawPixmap(0, 0, self.width(), self.height(), pixmap)
         p.end()
