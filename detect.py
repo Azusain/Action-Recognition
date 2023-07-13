@@ -167,6 +167,8 @@ def run(
             # Stream results
             # all the target area in im0 has been annotated!!!
             im0 = annotator.result()
+
+
             uim.img_buf = im0
 
             if uim.run_env.show_cv_window:
@@ -266,3 +268,5 @@ if __name__ == "__main__":
         except BaseException:
             LOGGER.info("Runtime error")
         uim.run_env.activated = False
+
+
