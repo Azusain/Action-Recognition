@@ -3,7 +3,7 @@
 * 危险行为识别
 ## 运行代码
 ### Docker
-* 可以通过下载docker镜像的方式获取代码运行环境(也可以使用项目中的Dockerfile自行构建镜像)
+* 可以通过下载docker镜像的方式获取代码运行环境(也可以使用项目中的 **/Docker/Dockerfile** 自行构建镜像)
 ```shell
   docker pull ar
 ```
