@@ -1,14 +1,29 @@
 # Action-Recognition
 * 2023大创项目仓库
 * 危险行为识别
+## 运行代码
+### Docker
+* 可以通过下载docker镜像的方式获取代码运行环境(也可以使用项目中的Dockerfile自行构建镜像)
+```shell
+  docker pull ar
+```
+* 实例化后容器会在后台运行
+```shell
+  docker run --gpus all [SSH_PORT]:22 ar
+  # 参数解释
+  # --gpus all  赋予容器调用GPU的权限
+  # [SSH_PORT]:22 将容器的22端口转发到[SSH_PORT]，之后外界通过端口[SSH_PORT]进行通信
+  # ar          镜像名称
+```
+* 此时可以通过ssh服务连接远程连接容器
+```shell
+  ssh root@[HOST] -p [SSH_PORT]
+  # 记得修改HOST以及SSH_PORT
+```
 ## Libirary
 * 在**pytorch， opencv，yolov5**等库上进行开发
 * 使用**PySide6**(Python-Qt)进行可视化界面展示
 * 目前使用**DroidCamX**作为网络摄像头采集数据
-* 在必要的情况下添加**c**编写的**dll**优化程序
-## Autodl 
-usr: <br>
-pw: 
 ## Progress
 * 2023/4/27:目前正在搭建基本图像处理框架，包装基本函数以便后续调用
 * 2023/5/22:基本的ui框架已经搭好，需要细节美化
