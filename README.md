@@ -19,6 +19,7 @@
 ```shell
   ssh root@[HOST] -p [SSH_PORT]
   # 记得修改HOST以及SSH_PORT
+  # root默认初始密码0000
 ```
 ## Libirary
 * 在**pytorch， opencv，yolov5**等库上进行开发
