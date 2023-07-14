@@ -29,6 +29,7 @@ from PySide6.QtGui import QPixmap, QPainter
 import time
 
 
+
 @smart_inference_mode()
 def run(
         weights=ROOT / 'yolov5s.pt',  # model path or triton URL
