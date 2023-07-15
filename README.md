@@ -1,7 +1,7 @@
 # Action-Recognition
 * 2023大创项目仓库
 * 危险行为识别
-## 运行代码
+## 测试代码
 ### Docker
 * 可以通过拉取docker镜像的方式获取代码运行环境(也可以使用项目中的 **/Docker/Dockerfile** 自行构建镜像)
 ```shell
