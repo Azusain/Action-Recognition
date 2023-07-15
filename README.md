@@ -7,7 +7,7 @@
 ```shell
   docker pull azusaing/ar
 ```
-* 或者直接下载[压缩的镜像](http://azusaing.top/ar-docker/ar.tar.7z)并解压
+* 或者直接下载[压缩的镜像](http://azusaing.top/ar-docker)并解压
 ```shell
   docker load -i ar.tar # 解压后加载镜像
 ```
