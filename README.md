@@ -5,7 +5,7 @@
 ### Docker
 * 可以通过拉取docker镜像的方式获取代码运行环境(也可以使用项目中的 **/Docker/Dockerfile** 自行构建镜像)
 ```shell
-  docker pull azusaing/ar
+  docker pull azusaing/ar:0.0.1
 ```
 * 或者直接下载[压缩的镜像](http://azusaing.top/ar-docker)并解压
 ```shell
