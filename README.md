@@ -3,9 +3,13 @@
 * 危险行为识别
 ## 运行代码
 ### Docker
-* 可以通过下载docker镜像的方式获取代码运行环境(也可以使用项目中的 **/Docker/Dockerfile** 自行构建镜像)
+* 可以通过拉取docker镜像的方式获取代码运行环境(也可以使用项目中的 **/Docker/Dockerfile** 自行构建镜像)
 ```shell
-  docker pull ar
+  docker pull azusaing/ar
+```
+* 或者直接下载[压缩的镜像](http://azusaing.top/ar-docker/ar.tar.7z)并解压
+```shell
+  docker load -i ar.tar # 解压后加载镜像
 ```
 * 实例化后容器会在后台运行
 ```shell
@@ -29,4 +33,5 @@
 * 2023/4/27:目前正在搭建基本图像处理框架，包装基本函数以便后续调用
 * 2023/5/22:基本的ui框架已经搭好，需要细节美化
 * 2023/6/29:已经实现图像分割客户端，之后需要优化UI，并打包到docker
+* 2023/7/14:打包到了docker 
 ## 本项目不用作商业用途仅供学习参考
