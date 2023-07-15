@@ -3,7 +3,7 @@
 * 危险行为识别
 ## 代码测试
 ### Docker
-* 可以通过拉取docker镜像的方式获取代码运行环境(也可以使用项目中的 **/Docker/Dockerfile** 自行构建镜像)
+* 可以通过拉取[docker镜像](https://hub.docker.com/repository/docker/azusaing/ar/general)的方式获取代码运行环境(也可以使用项目中的 **/Docker/Dockerfile** 自行构建镜像)
 ```shell
   docker pull azusaing/ar:0.0.1
 ```
