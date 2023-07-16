@@ -20,11 +20,12 @@ from utils.general import (LOGGER, Profile, check_file, check_img_size, check_im
 from utils.plots import Annotator, colors, save_one_box
 from utils.torch_utils import select_device, smart_inference_mode
 
-import ui_main as uim
-from ui_main import update_canvas, img_format_converter
-from ui_main import InterfaceThread, CanvasWidget
-from PySide6.QtWidgets import QLabel, QApplication, QListWidget
-from PySide6.QtGui import QPixmap, QPainter
+if os.name == "nt": # run in windows platform
+    import ui_main as uim
+    from ui_main import update_canvas, img_format_converter
+    from ui_main import InterfaceThread, CanvasWidget
+    from PySide6.QtWidgets import QLabel, QApplication, QListWidget
+    from PySide6.QtGui import QPixmap, QPainter
 
 import time
 
@@ -213,7 +214,6 @@ def run(
 
 def parse_opt():
     source_path = uim.run_env.conf_list['source']
-    # source_path = "https://www.youtube.com/watch?v=nq-DUt-PFF4"
     output_path = uim.run_env.output['source']
 
     parser = argparse.ArgumentParser()
@@ -256,18 +256,22 @@ def main(opt):
 
 
 if __name__ == "__main__":
-    try:
-        InterfaceThread().start()
-    except Exception as e:
-        LOGGER.info(e)
-
-    while True:
-        while uim.run_env is None or not uim.run_env.activated:
-            time.sleep(1)
+    if os.name == "nt":
+        print('boot in Windows (with GUI)')
         try:
-            main(parse_opt())
-        except BaseException:
-            LOGGER.info("Runtime error")
-        uim.run_env.activated = False
+            InterfaceThread().start()
+        except Exception as e:
+            LOGGER.info(e)
+        while True:
+            while uim.run_env is None or not uim.run_env.activated:
+                time.sleep(1)
+            try:
+                main(parse_opt())
+            except BaseException:
+                LOGGER.info("Runtime error")
+            uim.run_env.activated = False
+    else:
+        print('boot in linux (without GUI)')
 
+    
 
