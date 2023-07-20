@@ -15,9 +15,9 @@
 ```shell
   docker run --gpus all -p [SSH_PORT]:22 ar
   # 参数解释
-  # --gpus all  赋予容器调用GPU的权限
-  # [SSH_PORT]:22 将容器的22端口转发到[SSH_PORT]，之后外界通过端口[SSH_PORT]进行通信
-  # ar          镜像名称
+  # --gpus all            赋予容器调用GPU的权限
+  # -p     [SSH_PORT]:22  将容器的22端口转发到[SSH_PORT]，之后外界通过端口[SSH_PORT]进行通信
+  # ar                    镜像名称
   # 记得替换[SSH_PORT]
 ```
 * 此时可以通过ssh服务连接远程连接容器
