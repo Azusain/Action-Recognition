@@ -13,7 +13,7 @@
 ```
 * 实例化后容器会在后台运行
 ```shell
-  docker run --gpus all [SSH_PORT]:22 ar
+  docker run --gpus all -p [SSH_PORT]:22 ar
   # 参数解释
   # --gpus all  赋予容器调用GPU的权限
   # [SSH_PORT]:22 将容器的22端口转发到[SSH_PORT]，之后外界通过端口[SSH_PORT]进行通信
