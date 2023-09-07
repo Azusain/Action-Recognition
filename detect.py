@@ -214,7 +214,7 @@ def run(
 
 def parse_opt():
     source_path = uim.run_env.conf_list['source']
-    output_path = uim.run_env.output['source']
+    output_path = uim.run_env.conf_list['output']
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--weights', nargs='+', type=str, default=ROOT / 'yolov5s.pt', help='model path or triton URL')
@@ -225,11 +225,11 @@ def parse_opt():
     parser.add_argument('--iou-thres', type=float, default=0.45, help='NMS IoU threshold')
     parser.add_argument('--max-det', type=int, default=5, help='maximum detections per image')
     parser.add_argument('--device', default='', help='cuda device, i.e. 0 or 0,1,2,3 or cpu')
-    # parser.add_argument('--view-img', action='store_true', help='show results')
-    # parser.add_argument('--save-txt', action='store_true', help='save results to *.txt')
-    # parser.add_argument('--save-conf', action='store_true', help='save confidences in --save-txt labels')
-    # parser.add_argument('--save-crop', action='store_true', help='save cropped prediction boxes')
-    # parser.add_argument('--nosave', action='store_true', help='do not save images/videos')
+    parser.add_argument('--view-img', action='store_true', help='show results')
+    parser.add_argument('--save-txt', action='store_true', help='save results to *.txt')
+    parser.add_argument('--save-conf', action='store_true', help='save confidences in --save-txt labels')
+    parser.add_argument('--save-crop', action='store_true', help='save cropped prediction boxes')
+    parser.add_argument('--nosave', action='store_true', help='do not save images/videos')
     parser.add_argument('--classes', nargs='+', type=int, help='filter by class: --classes 0, or --classes 0 2 3')
     parser.add_argument('--agnostic-nms', action='store_true', help='class-agnostic NMS')
     parser.add_argument('--augment', action='store_true', help='augmented inference')
@@ -255,6 +255,7 @@ def main(opt):
     run(**vars(opt))
 
 
+# @todo: process recycle on close
 if __name__ == "__main__":
     if os.name == "nt":
         print('boot in Windows (with GUI)')
@@ -262,6 +263,7 @@ if __name__ == "__main__":
             InterfaceThread().start()
         except Exception as e:
             LOGGER.info(e)
+            
         while True:
             while uim.run_env is None or not uim.run_env.activated:
                 time.sleep(1)
@@ -273,5 +275,6 @@ if __name__ == "__main__":
     else:
         print('boot in linux (without GUI)')
 
-    
+# if __name__ == "__main__":
+#     main(parse_opt())
 

@@ -25,5 +25,5 @@ class RunningEnv:
         print(self.conf_list)
 
     def update_interface(self):
-        uim.ui.src_path = self.conf_list['source']
-        uim.ui.src_path = self.conf_list['output']
+        uim.ui.src_path.setText(self.conf_list['source'])
+        uim.ui.output_path.setText(self.conf_list['output'])

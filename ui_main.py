@@ -70,7 +70,6 @@ class InterfaceThread(threading.Thread):
         app = QApplication(sys.argv)
         ui = MainWindow()
         run_env = RunningEnv()
-        print("run_env has initiated")
         canvas = ui.label
         ui.show()
         # sub-thread for updating canvas
@@ -437,8 +436,6 @@ class PopWindowConf(QWidget):
         self.setLayout(vertical_layout)
         self.cfg_text = QPlainTextEdit()
         self.btn_save = QPushButton("Save")
-
-        print("PopWindowConf initiates")
         self.load_conf_file()
         vertical_layout.addWidget(self.cfg_text)
         vertical_layout.addWidget(self.btn_save)
@@ -446,11 +443,12 @@ class PopWindowConf(QWidget):
         # Slots Connections
 
     def load_conf_file(self):
-
         with open(run_env.conf_file_path, 'r') as file:
             data = file.read()
             self.cfg_text.setPlainText(data)
             file.close()
+        run_env.parse_conf_file()
+        run_env.update_interface()
         return
 
     def set_conf_file(self):
