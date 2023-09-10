@@ -1,2 +1,0 @@
-Use PySide6 Tools -> PySide6-pyuic.exe
-    for translating .ui file to .py file

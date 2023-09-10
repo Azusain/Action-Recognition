@@ -1,87 +1,74 @@
+import os
 import sys
 import threading
-import time
+from time import sleep
 
-import PySide6
-from PySide6.QtCore import (QCoreApplication, QDate, QDateTime, QLocale,
-    QMetaObject, QObject, QPoint, QRect,
-    QSize, QTime, QUrl, Qt)
-from PySide6.QtGui import (QAction, QBrush, QColor, QConicalGradient,
-    QCursor, QFont, QFontDatabase, QGradient,
-    QIcon, QImage, QKeySequence, QLinearGradient,
-    QPainter, QPalette, QPixmap, QRadialGradient,
-    QTransform)
-from PySide6.QtWidgets import (QApplication, QLabel, QListWidget, QListWidgetItem,
-                               QMainWindow, QMenu, QMenuBar, QSizePolicy,
-                               QSlider, QStatusBar, QWidget, QGridLayout, QHBoxLayout, QVBoxLayout, QSpacerItem,
-                               QPushButton, QListView, QProgressBar, QFileDialog, QPlainTextEdit)
-from RuntimeEnv import RunningEnv
+# user interface 
+if os.name == "nt": 
+    import PySide6
+    from PySide6.QtCore import (
+        QCoreApplication, QMetaObject, Signal,
+        QRect, QTimer, Qt, QSize
+    )
+    from PySide6.QtWidgets import (
+        QApplication, QLabel, QListWidget, QMainWindow, 
+        QMenu, QMenuBar, QSizePolicy, QWidget, 
+        QGridLayout, QHBoxLayout, QVBoxLayout, 
+        QSpacerItem, QPushButton, QListView, 
+        QProgressBar, QFileDialog, QPlainTextEdit
+    )
+    from PySide6.QtGui import (
+        QAction, QImage, QPainter, QPixmap
+    )
 
+# computer vision
+import cv2
 
-ui = None
-canvas = None
-app = None
-is_activated = True
-img_buf = None
-run_env = None
+# deep learning framework
+import numpy
+import torch
+from ultralytics import YOLO # go ahead to https://docs.ultralytics.com/reference for more reference
 
+rv = None
+ 
+def cv2qt_img_v1(cv_img) -> QImage:
+    qt_img = QImage(cv_img.data, cv_img.shape[1], cv_img.shape[0], QImage.Format_RGB888)
+    qt_img.rgbSwap()
+    print('img has been successfully converted')
+    return qt_img
 
-def update_canvas(canvas_widget, interval_sec=0.015):
-    global is_activated, ui
-    while is_activated:
-        canvas_widget.update()
-        # main_ui.detected_list = QListWidget()
-        # Try dynamic list-widget-item
-        # main_ui.detected_list.clear()
-        time.sleep(interval_sec)
-
+def cv2qt_img_v2(cv_img) -> QImage:
+    frame = cv2.cvtColor(cv_img, cv2.COLOR_BGR2RGB)
+    return QImage(frame, frame.shape[1], frame.shape[0], QImage.Format_RGB888)
+    
+    
+class RunningEnv:
+    def __init__(self):
+        # self.detectedList = uim.ui.detected_list
+        # self.detectedList = QListWidget()
+        # self.detectedList.addItems(["No detected objects"])
+        # self.conf_file_path = "./configurations/startup.cfg"
+        self.running = False
+        self.qt_img_buf = None
+        self.canvas = None
+        self.conf_list = {}
+        self.with_gui = False
 
 class CanvasWidget(QLabel):
     def __init__(self, cw):
         super().__init__(cw)
 
-    def paintEvent(self, event):
-        global img_buf
 
-        # tmp
-        p = QPainter()
-        p.begin(self)
-        if img_buf is not None:
-            # Attention here! It's needed indeed to transform cv2 format to qt format
-            pixmap = QPixmap.fromImage(img_format_converter(img_buf))
-            p.drawPixmap(0, 0, self.width(), self.height(), pixmap)
-        p.end()
-
-
-def img_format_converter(cv_img) -> QImage:
-    qt_img = QImage(cv_img.data, cv_img.shape[1], cv_img.shape[0], QImage.Format_RGB888)
-    qt_img.rgbSwap()
-    return qt_img
-
-
-class InterfaceThread(threading.Thread):
-    def __init__(self):
-        super().__init__(name="ui_main_thread")
-
-    def run(self):
-        # init interface
-        global canvas, app, is_activated, ui, run_env
-
-        app = QApplication(sys.argv)
-        ui = MainWindow()
-        run_env = RunningEnv()
-        canvas = ui.label
-        ui.show()
-        # sub-thread for updating canvas
-        threading.Thread(target=update_canvas, args=(ui.label,), name="ui_flash_thread").start()
-        # main interface
-        app.exec()
-        is_activated = False
-
+SEC_PER_FRAME = 1
 
 class MainWindow(QMainWindow):
     def __init__(self):
         super(MainWindow, self).__init__()
+        # timer
+        self.timer = QTimer()
+        self.timer.timeout.connect(self.update_img_buf)
+        self.timer.start(SEC_PER_FRAME)
+        
         # Popped Windows
         self.btn_more_opt = None
         self.pwu = None  # Instance of PopWindowUrl
@@ -326,8 +313,6 @@ class MainWindow(QMainWindow):
         self.actionSource.addAction(self.actionWebCam)
         self.actionSource.addAction(self.actionLocalFile)
 
-
-
         self.retranslateUi(MainWindow)
 
         # Slots Connections
@@ -336,7 +321,6 @@ class MainWindow(QMainWindow):
         self.btn_more_opt.pressed.connect(self.pop_conf_window)
         self.actionLocalFile.triggered.connect(self.set_src_local_file)
         self.btn_run.pressed.connect(self.set_runnable)
-
 
         self.detected_list.setCurrentRow(-1)
 
@@ -394,10 +378,18 @@ class MainWindow(QMainWindow):
         return
 
     def set_runnable(self):
-        global run_env
-        run_env.activated = True
-
-
+        global rv
+        rv.running = True
+        
+    def update_img_buf(self):
+        global rv
+        if rv.qt_img_buf is not None:
+            pix = QPixmap.fromImage(rv.qt_img_buf)
+            self.label.setPixmap(
+                pix.scaled(self.label.width(), self.label.height(), )
+            )
+        
+        
 class PopWindowUrl(QWidget):
     def __init__(self, mw):
         super().__init__()
@@ -464,4 +456,54 @@ class PopWindowConf(QWidget):
     # Slot Functions
 
 
+def model_routine(src):
+    cap = cv2.VideoCapture(src)
+    
+    while cap.isOpened():
+        # Read a frame from the video
+        success, frame = cap.read()
+        
+        if success:
+            results = pose_model(frame)
+            rv.qt_img_buf = cv2qt_img_v1(results[0].plot())
+            sleep(0.015)
 
+
+# @todo: model warm-up
+# @todo: thread recycling?
+
+# initialization
+rv = RunningEnv()
+main_window = None
+MODEL_PATH =  "yolov8n-pose.pt" 
+
+# loading model
+pose_model = YOLO(MODEL_PATH).to(
+    torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+)
+
+if __name__ == "__main__":
+    # boot settings with prompt
+    rv.with_gui = input('boot with gui? (y/n) -> ') == "y"
+    
+    print('using device: {}'.format(pose_model.device))
+    
+    if rv.with_gui and os.name == 'nt':     # boot with gui
+        print('boot with GUI')
+        
+        threading.Thread(
+            target=model_routine,
+            args=("test\media_src\src.mp4",), 
+            name="model_thread", 
+        ).start()
+        
+        # main ui
+        app = QApplication(sys.argv)
+        main_window = MainWindow()
+        rv.canvas = main_window.label
+        main_window.show()
+        app.exec()
+        
+        
+    else:                               # boot without gui
+        print('boot with no GUI)')
