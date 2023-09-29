@@ -18,30 +18,31 @@ if os.name == "nt":
         QProgressBar, QFileDialog, QPlainTextEdit
     )
     from PySide6.QtGui import (
-        QAction, QImage, QPainter, QPixmap
+        QAction, QImage, QPixmap
     )
 
 # computer vision
 import cv2
 
 # deep learning framework
-import numpy
 import torch
 from ultralytics import YOLO # go ahead to https://docs.ultralytics.com/reference for more reference
 
-rv = None
- 
-def cv2qt_img_v1(cv_img) -> QImage:
-    qt_img = QImage(cv_img.data, cv_img.shape[1], cv_img.shape[0], QImage.Format_RGB888)
-    qt_img.rgbSwap()
-    print('img has been successfully converted')
-    return qt_img
+
+# ============================================ Utils ===================================================
+
+# def cv2qt_img_v1(cv_img) -> QImage:
+#     qt_img = QImage(cv_img.data, cv_img.shape[1], cv_img.shape[0], QImage.Format_RGB888)
+#     qt_img.rgbSwap()
+#     return qt_img
 
 def cv2qt_img_v2(cv_img) -> QImage:
     frame = cv2.cvtColor(cv_img, cv2.COLOR_BGR2RGB)
     return QImage(frame, frame.shape[1], frame.shape[0], QImage.Format_RGB888)
+
     
-    
+# ===================================== Runtime Environments ==========================================
+
 class RunningEnv:
     def __init__(self):
         # self.detectedList = uim.ui.detected_list
@@ -54,12 +55,24 @@ class RunningEnv:
         self.conf_list = {}
         self.with_gui = False
 
+rv = RunningEnv()
+main_window = None
+
+SEC_PER_FRAME = 1
+MODEL_PATH =  "models/yolov8n-pose.pt" 
+TEST_VIDEO = "test/media_src/big_buck_bunny.mp4"
+
+# loading model
+pose_model = YOLO(MODEL_PATH).to(
+    torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+)
+
+# ====================================== User Interface =================================================
+
 class CanvasWidget(QLabel):
     def __init__(self, cw):
         super().__init__(cw)
 
-
-SEC_PER_FRAME = 1
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -455,32 +468,39 @@ class PopWindowConf(QWidget):
 
     # Slot Functions
 
-
+# ================================================ Inference ==================================================
 def model_routine(src):
     cap = cv2.VideoCapture(src)
-    
     while cap.isOpened():
-        # Read a frame from the video
         success, frame = cap.read()
-        
         if success:
             results = pose_model(frame)
-            rv.qt_img_buf = cv2qt_img_v1(results[0].plot())
+            rv.qt_img_buf = cv2qt_img_v2(results[0].plot())
             sleep(0.015)
+
+
+def infer_from_video(src):
+    cap = cv2.VideoCapture(src)
+    millisec_per_frame = 1
+    
+    while cap.isOpened():
+        success, frame = cap.read()
+        if success:
+            print("working")
+            results = pose_model(frame)
+            # show in cv2 
+            cv2.imshow("result", results[0].plot())
+            cv2.waitKey(millisec_per_frame)
+            
+            # sleep(0.015)
 
 
 # @todo: model warm-up
 # @todo: thread recycling?
 
-# initialization
-rv = RunningEnv()
-main_window = None
-MODEL_PATH =  "yolov8n-pose.pt" 
 
-# loading model
-pose_model = YOLO(MODEL_PATH).to(
-    torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-)
+# ================================================== Main =====================================================
+
 
 if __name__ == "__main__":
     # boot settings with prompt
@@ -493,7 +513,7 @@ if __name__ == "__main__":
         
         threading.Thread(
             target=model_routine,
-            args=("test\media_src\src.mp4",), 
+            args=(TEST_VIDEO,), 
             name="model_thread", 
         ).start()
         
@@ -504,6 +524,6 @@ if __name__ == "__main__":
         main_window.show()
         app.exec()
         
-        
     else:                               # boot without gui
+        infer_from_video(TEST_VIDEO)
         print('boot with no GUI)')
