@@ -60,7 +60,7 @@ main_window = None
 
 SEC_PER_FRAME = 1
 MODEL_PATH =  "models/yolov8n-pose.pt" 
-TEST_VIDEO = "test/media_src/big_buck_bunny.mp4"
+TEST_VIDEO = "test/media_src/src.mp4"
 
 # loading model
 pose_model = YOLO(MODEL_PATH).to(
