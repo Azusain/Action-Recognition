@@ -8,4 +8,8 @@
 
 * 在**pytorch，opencv，ultralytics**等库上进行开发
 
+
+![Alt text](demo.jpg)
+
+
 ## 本项目不用作商业用途仅供学习参考
