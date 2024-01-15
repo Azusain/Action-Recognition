@@ -11,7 +11,7 @@ if __name__ == "__main__":
     parser.add_argument('-m', '--mode')
     parser.add_argument('-s', '--source')
     parser.add_argument('-p', '--pose_model', default='./models/yolov8s-pose.pt')
-    parser.add_argument('-d', '--detection_model', default='./models/best.pt')    
+    parser.add_argument('-d', '--detection_model', default='./models/sports_n.pt')    
     parser.add_argument('-w', '--wait_ms', type=int, default=1)
     args = parser.parse_args()    
     
@@ -21,9 +21,10 @@ if __name__ == "__main__":
         mode = SitupFSM
     elif args.mode == 'pushup':
         mode = PushupFSM
-    elif mode == 'highknee':
+    elif args.mode == 'highknee':
         mode = HighkneeFSM
     else:
+        print('please choose a valid mode using "-m" option')
         exit(-1)    
 
     detection_model_path = args.detection_model
