@@ -7,7 +7,6 @@ class SportState(Enum):
     INIT = 0
     READY = 1
     ONGOING = 2    
-    DONE = 3
     
 class SitupFSM():
     class TypeInput(Enum):

@@ -52,7 +52,7 @@ if __name__ == "__main__":
     frame_cnt = 0
     print(f'video fps: {fps} -> {frame_time_sec}s per frame')
 
-    
+    # main event loop
     while True:
         success, frame = cap.read()
         if not success:
