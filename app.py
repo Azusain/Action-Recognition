@@ -4,7 +4,10 @@ import cv2
 import argparse
 # project modules
 from sports_fsm import PushupFSM, SitupFSM, HighkneeFSM
-from app_utils import draw_text
+
+def draw_text(img, text, pos, fontScale=2.0):
+    cv2.putText(img = img, text = text,org = pos, fontFace = cv2.QT_FONT_NORMAL, 
+        fontScale = fontScale,  color = (76, 228, 228), thickness = 3)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -96,4 +99,3 @@ if __name__ == "__main__":
 
         cv2.imshow(' ', frame)
         cv2.waitKey(frame_wait_time_ms) 
-        

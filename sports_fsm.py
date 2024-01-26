@@ -51,7 +51,8 @@ class SitupFSM():
         y_delta = keypoints[11][1] - keypoints[5][1]
 
         angle_rad = torch.arctan(y_delta / abs(x_delta))
-        if x_delta < 0:
+        if abs(keypoints[11][0] - keypoints[5][0]) + abs(keypoints[11][0] - keypoints[15][0])\
+            == abs(keypoints[5][0] - keypoints[15][0]):
             self.angle_ = PI - angle_rad
         else: 
             self.angle_ = angle_rad
